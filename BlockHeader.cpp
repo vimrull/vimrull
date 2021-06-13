@@ -17,8 +17,7 @@ BlockHeader::~BlockHeader()
 }
 
 void BlockHeader::unpack(std::stringstream &ss) {
-	char data[100];
-
+	char data[65];
 	ss.read(data, 8);
 	hex2bin((unsigned char *)&version, (unsigned char *)data, 8);
 
@@ -43,11 +42,16 @@ void BlockHeader::unpack(std::stringstream &ss) {
 int BlockHeader::pack(std::stringstream &ss)
 {
     int pos = 0;
-    pos += pack_hex(ss, &version, sizeof(int32_t));
-    pos += pack_hex(ss, &prev_block, 32);
-    pos += pack_hex(ss, &merkle_root, 32);
-    pos += pack_hex(ss, &timestamp, sizeof(uint32_t));
-    pos += pack_hex(ss, &bits, sizeof(uint32_t));
-    pos += pack_hex(ss, &nonce, sizeof(uint32_t));
+    pos += pack_ptr2hex(ss, &version, sizeof(int32_t));
+    pos += pack_ptr2hex(ss, &prev_block, 32);
+    pos += pack_ptr2hex(ss, &merkle_root, 32);
+    pos += pack_ptr2hex(ss, &timestamp, sizeof(uint32_t));
+    pos += pack_ptr2hex(ss, &bits, sizeof(uint32_t));
+    pos += pack_ptr2hex(ss, &nonce, sizeof(uint32_t));
 	return pos;
+}
+
+bool BlockHeader::is_valid()
+{
+    return true;
 }

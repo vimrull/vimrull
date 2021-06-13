@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <string>
 #include <stdlib.h>
+#include <filesystem>
 
 #include "sha256.h"
 #include "load.h"
@@ -28,12 +29,18 @@ int hex2bin(unsigned char *dest, unsigned char *src, int len);
 
 int hexdump(stringstream &ss, unsigned char *data, int len);
 
-void read_block_file(string filename, stringstream &ss) {
+bool read_block_file(string filename, stringstream &ss)
+{
+    if (!std::filesystem::exists(filename))
+    {
+        return false;
+    }
     std::ifstream ifs(filename);
     std::string content((std::istreambuf_iterator<char>(ifs)),
                         (std::istreambuf_iterator<char>()));
 
     ss << content;
+    return true;
 }
 
 int read(stringstream &ss, int size, void *dst) {
@@ -46,7 +53,7 @@ int read(stringstream &ss, int size, void *dst) {
     return 0;
 }
 
-int pack_hex(stringstream &ss, void *src, size_t size) {
+int pack_ptr2hex(stringstream &ss, void *src, size_t size) {
     assert(size > 0 && size <= 10000);
     return hexdump(ss, (unsigned char *) src, size);
 }
@@ -162,6 +169,41 @@ int pack_var_int(unsigned char *output, int &output_len, int64_t val) {
     return size;
 }
 
+int pack_var_int(std::vector<char> &output, int64_t val)
+{
+    int initial_size = output.size();
+    int size = 0;
+    char byte1;
+    char tmp_output[10];
+
+    if (val < 0xFD) {
+        size = 1;
+        char tval = (val & 0xFF);
+        std::memcpy(tmp_output, &tval, 1);
+    } else if (val <= 0xFFFF) {
+        size = 3;
+        int16_t tval = (val & 0xFFFF);
+        byte1 = 0xFD;
+        std::memcpy(tmp_output, &byte1, 1);
+        std::memcpy(tmp_output + 1, &tval, 2);
+    } else if (val <= 0xFFFFFFFF) {
+        size = 5;
+        int32_t tval = (val & 0xFFFFFFFF);
+        byte1 = 0xFE;
+        std::memcpy(tmp_output, &byte1, 1);
+        std::memcpy(tmp_output + 1, &tval, 4);
+    } else {
+        size = 9;
+        byte1 = 0xFF;
+        std::memcpy(tmp_output, &byte1, 1);
+        std::memcpy(tmp_output + 1, &val, 8);
+    }
+
+    output.insert(output.end(), tmp_output, &tmp_output[size]);
+    assert(initial_size+size == output.size());
+    return size;
+}
+
 int pack_var_int(std::stringstream &ss_target, int64_t val) {
     int size = 0;
     char byte1;
@@ -238,6 +280,13 @@ int hexdump(stringstream &ss, unsigned char *data, int len) {
         ss << hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[c++]);
     }
     return len * 2;
+}
+
+std::string hexdump(void *data, int len)
+{
+    std::stringstream ss;
+    hexdump(ss, (unsigned char *)data, len);
+    return ss.str();
 }
 
 void byte_swap(unsigned char *data, int len) {
@@ -334,10 +383,10 @@ void test_calculate_merkle_root()
 	for (int i = 0;i < tx_count;i++)
 	{
 		Transaction tx;
-		tx.unpack(ss);
+		tx.unpack_hex(ss);
 
 		len = datasize;
-		tx.pack((char *)txd, len);
+		tx.pack_hex((char *)txd, len);
 		auto hash = dhash(txd, datasize - len);
 		transactions.push_back(hash);
 		//hexdump(hash, 32);
@@ -381,7 +430,7 @@ void test_calculate_merkle_root2()
 
 	read_block_file(filename, ss);
 	std::vector<unsigned char *> transactions;
-	block.unpack(ss);
+	block.unpack_hex(ss);
 
 	auto mr = block.CalculateMerkleRoot();
 	hexdump(mr, 32);

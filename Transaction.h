@@ -27,8 +27,8 @@ public:
 
 	Transaction();
 	virtual ~Transaction();
-	virtual int pack(std::stringstream &ss);
-	virtual void unpack(std::stringstream &ss);
+	virtual int pack_hex(std::stringstream &ss);
+	virtual void unpack_hex(std::stringstream &ss);
 	bool allow_witness();
 	virtual void print();
 

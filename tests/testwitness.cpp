@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "Witness.h"
 
-TEST_CASE("Test witness unpack/pack", "[Witness]")
+TEST_CASE("Test witness unpack_hex/pack_hex", "[Witness]")
 {
     Witness w;
     std::string witness_str = "01200000000000000000000000000000000000000000000000000000000000000000";

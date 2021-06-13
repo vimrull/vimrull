@@ -42,10 +42,10 @@ int main(void)
         read_block_file(file_name, ss);
         std::cout << ss.str() << std::endl;
         Block block;
-        block.unpack(ss);
+        block.unpack_hex(ss);
 
         std::stringstream output, out, outheader;
-        block.pack(output);
+        block.pack_hex(output);
         auto outstr = output.str();
         hexdump(out, (unsigned char *) outstr.c_str(), outstr.length());
         std::cout << out.str() << std::endl;
@@ -122,9 +122,9 @@ void download_some()
             std::string str1 = ss.str();
             int len1 = str1.length();
             Block block;
-            block.unpack(ss);
+            block.unpack_hex(ss);
 
-            block.pack(ss2);
+            block.pack_hex(ss2);
 
             std::string str2 = ss2.str();
             int len2 = str2.length();

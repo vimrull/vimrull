@@ -20,6 +20,7 @@ set(CORE_FILES Block.cpp
     TransactionInput.cpp
     TransactionOutput.cpp
     Witness.cpp
+    vm/BitcoinVM.cpp
 )
 add_executable(testinit ${CORE_FILES}
     tests/test_download.cpp

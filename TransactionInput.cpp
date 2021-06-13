@@ -15,9 +15,9 @@ TransactionInput::~TransactionInput()
 {
 }
 
-void TransactionInput::unpack(std::stringstream &ss)
+void TransactionInput::unpack_hex(std::stringstream &ss)
 {
-    previous_output.unpack(ss);
+    previous_output.unpack_hex(ss);
     //read(ss, 32, previous_output.hash);
     //previous_output.index = read_int32(ss);
     script_size = read_var_int(ss);
@@ -49,16 +49,18 @@ void TransactionInput::ReadBlockHeight()
         data[0] = 0;
         block_height = 0; // since we are updating 3 bytes lets clear first
         std::memcpy(&block_height, &script[1], 3);
-    } else
+    }
+    else
     {
         block_height = 0;
     }
 }
 
-int TransactionInput::pack(char *output, int &output_len)
+int TransactionInput::pack(std::vector<char> output)
 {
-    char *pos = output;
-    pos += previous_output.pack(pos, output_len);
+    /*
+    char *pos = output.data();
+    pos += previous_output.pack_hex(pos);
 
     pos += pack_var_int((unsigned char *) pos, output_len, script_size);
 
@@ -72,23 +74,34 @@ int TransactionInput::pack(char *output, int &output_len)
     output_len -= sizeof(int32_t);
 
     return int(pos - output);
+     */
+    return 0;
 }
 
-int TransactionInput::pack(std::stringstream &ss)
+int TransactionInput::pack_hex(std::stringstream &ss)
 {
     int pos = 0;
-    pos += previous_output.pack(ss);
+    pos += previous_output.pack_hex(ss);
     pos += pack_var_int(ss, script_size);
     if (script_size > 0)
     {
-        pos += pack_hex(ss, script, script_size);
+        pos += pack_ptr2hex(ss, script, script_size);
     }
 
-    pos += pack_hex(ss, &sequence, sizeof(int32_t));
+    pos += pack_ptr2hex(ss, &sequence, sizeof(int32_t));
     return pos;
 }
 
 bool TransactionInput::IsCoinbase()
 {
     return previous_output.index == 0xFFFFFFFF;
+}
+
+bool TransactionInput::is_valid()
+{
+    for(auto& w: witness_list)
+    {
+        ENSURE_IS_VALID(w.is_valid());
+    }
+    return true;
 }

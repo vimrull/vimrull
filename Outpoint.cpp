@@ -12,7 +12,7 @@ Outpoint::~Outpoint()
 {
 }
 
-void Outpoint::unpack(std::stringstream &ss)
+void Outpoint::unpack_hex(std::stringstream &ss)
 {
     read(ss, 32, hash);
     index = read_int32(ss);
@@ -32,10 +32,15 @@ int Outpoint::pack(char *output, int &output_len)
 	return int(pos - output);
 }
 
-int Outpoint::pack(std::stringstream &ss)
+int Outpoint::pack_hex(std::stringstream &ss)
 {
     int pos = 0;
-    pos += pack_hex(ss, hash, 32);
-    pos += pack_hex(ss, &index, sizeof(uint32_t));
+    pos += pack_ptr2hex(ss, hash, 32);
+    pos += pack_ptr2hex(ss, &index, sizeof(uint32_t));
     return pos;
+}
+
+bool Outpoint::is_valid()
+{
+    return true;
 }

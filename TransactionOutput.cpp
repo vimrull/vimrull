@@ -13,7 +13,7 @@ TransactionOutput::~TransactionOutput()
 {
 }
 
-void TransactionOutput::unpack(std::stringstream &ss)
+void TransactionOutput::unpack_hex(std::stringstream &ss)
 {
     read(ss, 8, &value);
     script_size = read_var_int(ss);
@@ -37,11 +37,15 @@ int TransactionOutput::pack(char *output, int &output_len)
     return int(pos - output);
 }
 
-int TransactionOutput::pack(std::stringstream &ss)
+int TransactionOutput::pack_hex(std::stringstream &ss)
 {
     int pos = 0;
-    pos += pack_hex(ss, &value, sizeof(uint64_t));
+    pos += pack_ptr2hex(ss, &value, sizeof(uint64_t));
     pos += pack_var_int(ss, script_size);
-    pos += pack_hex(ss, (unsigned char *) script, script_size);
+    pos += pack_ptr2hex(ss, (unsigned char *) script, script_size);
     return pos;
+}
+bool TransactionOutput::is_valid()
+{
+    return true;
 }

@@ -24,4 +24,6 @@ public:
 	~BlockHeader();
 	virtual void unpack(std::stringstream &ss);
 	int pack(std::stringstream &ss);
+
+    virtual bool is_valid();
 };

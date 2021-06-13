@@ -24,7 +24,8 @@ public:
 	Block();
 	virtual ~Block();
 
-	virtual void unpack(std::stringstream &ss);
-	virtual int pack(std::stringstream &ss);
+	virtual void unpack_hex(std::stringstream &ss);
+	virtual int pack_hex(std::stringstream &ss);
+	virtual bool is_valid();
 	virtual unsigned char * CalculateMerkleRoot();
 };

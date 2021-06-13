@@ -5,7 +5,7 @@
 #include "catch2.hpp"
 
 
-TEST_CASE("Test transaction unpack/pack", "[TransactionOutput]")
+TEST_CASE("Test transaction unpack_hex/pack_hex", "[TransactionOutput]")
 {
     /*
     std::string tx_str = "00200000000010113a4f4e13f5ce58f5d49cd97b127a902e85ed0bf771398d1e31c41f2fed808982e00000000ffff"
@@ -15,9 +15,9 @@ TEST_CASE("Test transaction unpack/pack", "[TransactionOutput]")
                          "f70942000000000";
     Transaction tx;
     std::stringstream ss(tx_str);
-    tx.unpack(ss);
+    tx.unpack_hex(ss);
     std::stringstream ss1;
-    tx.pack(ss1);
+    tx.pack_hex(ss1);
     std::string packed_str = ss1.str();
     REQUIRE(tx_str.compare(packed_str) == 0);
     */

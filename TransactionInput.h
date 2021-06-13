@@ -28,13 +28,14 @@ public:
 	// Only if the input is coinbase input
 	int block_height;
 
-	virtual void unpack(std::stringstream &ss);
-	virtual int pack(char *output, int &output_len);
-    virtual int pack(std::stringstream &ss);
+	virtual void unpack_hex(std::stringstream &ss);
+	virtual int pack(std::vector<char> output);
+    virtual int pack_hex(std::stringstream &ss);
 	virtual void ReadBlockHeight();
 
 	TransactionInput();
 	virtual ~TransactionInput();
 
 	virtual bool IsCoinbase();
+    virtual bool is_valid();
 };

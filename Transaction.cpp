@@ -18,7 +18,7 @@ Transaction::~Transaction()
 {
 }
 
-void Transaction::unpack(std::stringstream &ss)
+void Transaction::unpack_hex(std::stringstream &ss)
 {
     version = read_int32(ss);
 
@@ -30,7 +30,7 @@ void Transaction::unpack(std::stringstream &ss)
     for (int i = 0; i < input_count; i++)
     {
         TransactionInput input;
-        input.unpack(ss);
+        input.unpack_hex(ss);
         inputs.push_back(input);
     }
 
@@ -39,7 +39,7 @@ void Transaction::unpack(std::stringstream &ss)
     for (int i = 0; i < output_count; i++)
     {
         TransactionOutput output;
-        output.unpack(ss);
+        output.unpack_hex(ss);
         outputs.push_back(output);
     }
 
@@ -57,15 +57,15 @@ void Transaction::unpack(std::stringstream &ss)
     locktime = read_int32(ss);
 }
 
-int Transaction::pack(std::stringstream &ss)
+int Transaction::pack_hex(std::stringstream &ss)
 {
     int pos = 0;
 
-    pos += pack_hex(ss, &version, sizeof(int32_t));
+    pos += pack_ptr2hex(ss, &version, sizeof(int32_t));
 
     if(has_witness)
     {
-        pos += pack_hex(ss, (void *) POSITIVE_WITNESS_FLAG, 2);
+        pos += pack_ptr2hex(ss, (void *) POSITIVE_WITNESS_FLAG, 2);
     }
 
     pos += pack_var_int(ss, input_count);
@@ -73,7 +73,7 @@ int Transaction::pack(std::stringstream &ss)
     for (varint i = 0; i < input_count; i++)
     {
         auto txi = inputs[i];
-        pos += txi.pack(ss);
+        pos += txi.pack_hex(ss);
     }
 
     pos += pack_var_int(ss, output_count);
@@ -81,7 +81,7 @@ int Transaction::pack(std::stringstream &ss)
     for (varint i = 0; i < output_count; i++)
     {
         auto txo = outputs[i];
-        pos += txo.pack(ss);
+        pos += txo.pack_hex(ss);
     }
 
     //std::cout << "After output: " << ss.tellp() << std::endl;
@@ -96,7 +96,7 @@ int Transaction::pack(std::stringstream &ss)
 
     //std::cout << "After witness: " << ss.tellp() << std::endl;
 
-    pos += pack_hex(ss, &locktime, sizeof(uint32_t));
+    pos += pack_ptr2hex(ss, &locktime, sizeof(uint32_t));
     return pos;
 }
 
@@ -142,6 +142,20 @@ void Transaction::print()
 //https://en.bitcoin.it/wiki/Protocol_rules
 bool Transaction::is_valid()
 {
+    // Make sure neither in or out lists are empty
+    ENSURE_IS_VALID(input_count > 0 && output_count > 0);
+    ENSURE_IS_VALID(inputs.size() == input_count);
+    ENSURE_IS_VALID(outputs.size() == output_count);
+
+    for(auto& inp: inputs)
+    {
+        ENSURE_IS_VALID(inp.is_valid());
+    }
+
+    for(auto& outp: outputs)
+    {
+        ENSURE_IS_VALID(outp.is_valid());
+    }
 
     return true;
 }

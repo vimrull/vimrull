@@ -1,16 +1,4 @@
-#include "malloc.h"
 #include <string.h>
-#include <iostream>
-#include <sstream>
-#include <bitset>
-#include <fstream>
-#include <algorithm>
-#include <iomanip>
-#include <cassert>
-#include <vector>
-#include <string>
-#include <stdlib.h>
-
 #include "sha256_btc.h"
 #include "common_btc.h"
 
