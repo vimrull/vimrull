@@ -4,7 +4,6 @@
 #include <Transaction.h>
 #include "catch2.hpp"
 
-
 TEST_CASE("Test transaction unpack_hex/pack_hex", "[TransactionOutput]")
 {
     /*

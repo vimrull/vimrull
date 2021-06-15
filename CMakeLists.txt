@@ -21,7 +21,7 @@ set(CORE_FILES Block.cpp
     TransactionOutput.cpp
     Witness.cpp
     vm/BitcoinVM.cpp
-)
+        vm/opcodes.h vm/variable.cpp vm/variable.h)
 add_executable(testinit ${CORE_FILES}
     tests/test_download.cpp
 )
@@ -41,7 +41,7 @@ add_executable(bitcointest ${CORE_FILES}
         tests/testload.cpp
         tests/testoutpoint.cpp
         tests/testtransaction.cpp
-        tests/testtransactionoutput.cpp)
+        tests/testtransactionoutput.cpp tests/vm/testscript.cpp tests/vm/testvariable.cpp)
 
 target_include_directories(bitcointest PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
