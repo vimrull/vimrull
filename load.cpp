@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <filesystem>
 
-#include "sha256.h"
+#include <hashlib/sha256.h>
 #include "load.h"
 #include "BlockHeader.h"
 #include "Transaction.h"

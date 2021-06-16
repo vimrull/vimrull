@@ -6,7 +6,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
-#include "sha256_btc.h"
+#include "hashlib/sha256_btc.h"
 #include "load.h"
 
 TEST_CASE("Test pack_var_int", "[load]")

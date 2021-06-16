@@ -10,7 +10,7 @@
 #include "load.h"
 #include "BlockHeader.h"
 #include "Transaction.h"
-#include "sha256.h"
+#include "hashlib/sha256.h"
 #include "Block.h"
 
 #define CURL_STATICLIB 1

@@ -15,7 +15,8 @@ set(CORE_FILES Block.cpp
     load.cpp
     Outpoint.cpp
     ProtocolElement.cpp
-    sha256.cpp
+    hashlib/sha256.cpp
+    hashlib/ripemd160.cpp
     Transaction.cpp
     TransactionInput.cpp
     TransactionOutput.cpp
