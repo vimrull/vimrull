@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 project(bitcoin VERSION 0.1)
 
@@ -9,6 +9,8 @@ set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
 
 include_directories(${CURL_INCLUDE_DIR})
+
+add_subdirectory(tink)
 
 set(CORE_FILES Block.cpp
         BlockHeader.cpp
@@ -48,10 +50,25 @@ add_executable(bitcointest ${CORE_FILES}
         tests/testtransactionoutput.cpp
         tests/vm/testscript.cpp
         tests/vm/testvariable.cpp
-        tests/hashlib/testripemd160.cpp)
+        tests/hashlib/testripemd160.cpp tests/crypto/signtest.cpp)
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
 
-target_link_libraries(bitcointest ${CURL_LIBRARIES})
+target_link_libraries(bitcointest ${CURL_LIBRARIES}
+        tink::static
+        absl::algorithm
+        absl::base
+        absl::debugging
+        absl::flat_hash_map
+        absl::flags
+        absl::memory
+        absl::meta
+        absl::numeric
+        absl::random_random
+        absl::strings
+        absl::synchronization
+        absl::time
+        absl::utility
+        )

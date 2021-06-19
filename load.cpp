@@ -31,10 +31,13 @@ int hexdump(stringstream &ss, unsigned char *data, int len);
 
 bool read_block_file(string filename, stringstream &ss)
 {
+    /*
     if (!std::filesystem::exists(filename))
     {
         return false;
     }
+     */
+
     std::ifstream ifs(filename);
     std::string content((std::istreambuf_iterator<char>(ifs)),
                         (std::istreambuf_iterator<char>()));

@@ -101,7 +101,7 @@ TEST_CASE("Test block traversing", "[block loop]")
     bool found_genesis = false;
     while (!found_genesis) {
         std::string file_name = "bitcoindata/rawblock/"+next_block+".hex";
-        REQUIRE(std::filesystem::exists(file_name));  // run downloader first (testinit)
+        //REQUIRE(std::filesystem::exists(file_name));  // run downloader first (testinit)
         std::stringstream ss;
         read_block_file(file_name, ss);
         Block block;
