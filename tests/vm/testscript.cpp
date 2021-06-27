@@ -101,12 +101,15 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     REQUIRE(output_block.transaction_count == 2);
     REQUIRE(output_block.transactions[0].output_count == 1);
     REQUIRE(output_block.transactions[1].output_count == 2);
+
+    //output 0
     REQUIRE(output_block.transactions[1].outputs[0].value == 1000000000);
     REQUIRE(output_block.transactions[1].outputs[0].script_size == 0x43);
     auto output_script0 = output_block.transactions[1].outputs[0].script;
     REQUIRE(output_script0[0] == 0x41);
     REQUIRE(output_script0[0+0x41+1] == OP_CHECKSIG);
 
+    // output 1
     REQUIRE(output_block.transactions[1].outputs[1].value == 4000000000);
     REQUIRE(output_block.transactions[1].outputs[1].script_size == 0x43);
     auto output_script1 = output_block.transactions[1].outputs[1].script;

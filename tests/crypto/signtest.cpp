@@ -34,6 +34,8 @@
 #include <load.h>
 #include <proto/tink.pb.h>
 #include <tink/signature/signature_pem_keyset_reader.h>
+#include <cryptopp/hex.h>
+#include <cryptopp/base64.h>
 
 // install
 // git clone https://github.com/vimrull/cryptopp
@@ -174,7 +176,7 @@ TEST_CASE("Test PEM Format", "[crypto]")
     //REQUIRE(keyset_reader_or.status().ok());
 }
 
-TEST_CASE("Test crypto++ sign", "[sign]")
+TEST_CASE("Test crypto++ sign - generate key", "[sign]")
 {
     //https://www.cryptopp.com/wiki/Elliptic_Curve_Digital_Signature_Algorithm
     using namespace CryptoPP;
@@ -187,7 +189,6 @@ TEST_CASE("Test crypto++ sign", "[sign]")
     std::string message = "Do or do not. There is no try.";
     size_t siglen = signer.MaxSignatureLength();
     std::string signature(siglen, 0x00);
-
 
     siglen = signer.SignMessage( prng, (const byte*)&message[0], message.size(), (byte*)&signature[0] );
     signature.resize(siglen);
@@ -206,4 +207,43 @@ TEST_CASE("Test crypto++ sign", "[sign]")
     } else {
         //std::cout << "All good!" << std::endl;
     }
+}
+
+TEST_CASE("Test crypto++ sign - use existing key", "[sign]")
+{
+    using namespace CryptoPP;
+
+    std::string keystr = "MHQCAQEEIIHHDjb/pePmQl3BnHw1MV09ctxgt5y3j+AJozXeKd0ioAcGBSuBBAAK\n"
+                          "oUQDQgAEov7xgp4HQricIYxRiY2efLnVEgG6K/nZ6SFOu2rzJwiJhojuiyFv5njI\n"
+                          "oLTNWdH9N3jQsv8GzXXWsKs5+9gJcw==";
+    ByteQueue queue;
+    Base64Decoder decoder;
+
+    decoder.Attach(new Redirector(queue));
+    decoder.Put((const byte*)keystr.data(), keystr.length());
+    decoder.MessageEnd();
+    AutoSeededRandomPool prng;
+
+    ECDSA_RFC6979<ECP, SHA256>::PrivateKey k1;
+    //k1.Initialize( prng, ASN1::secp256r1() );
+    k1.BERDecodePrivateKey(queue, false /*paramsPresent*/, queue.MaxRetrievable());
+    REQUIRE(queue.IsEmpty());
+    ECDSA_RFC6979<ECP, SHA256>::Signer signer(k1);
+
+    std::string message = "Do or do not. There is no try.";
+    size_t siglen = signer.MaxSignatureLength();
+    std::string signature(siglen, 0x00);
+
+    siglen = signer.SignMessage( prng, (const byte*)message.c_str(), message.length(), (byte*)&signature[0] );
+    signature.resize(siglen);
+    std::string expected_sign_hex = "01c3f2dedfaa19e7f0ca9c2b96e3d3426f9a117694ddd4a3a72aeffdd585749b937b8f84eae6df6beb120a25f778199c4654ee0feee19a1d2387d5ae07e91ef8";
+    std::string  sign_hex = hexdump((void *) signature.c_str(), signature.length());
+    REQUIRE(expected_sign_hex.compare(sign_hex) == 0);
+    ECDSA_RFC6979<ECP, SHA256>::PublicKey publicKey;
+    k1.MakePublicKey(publicKey);
+    ECDSA_RFC6979<ECP, SHA256>::Verifier verifier(publicKey);
+
+    bool result = verifier.VerifyMessage( (const byte*)&message[0], message.size(), (const byte*)&signature[0], signature.size() );
+
+    REQUIRE(result);
 }
