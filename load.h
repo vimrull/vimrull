@@ -43,3 +43,4 @@ int64_t readInt64(std::stringstream &ss);
 int64_t read_var_int(std::stringstream &ss);
 int hex2bin(unsigned char *dest, unsigned char *src, int len);
 void print_hash(const char *data, long len);
+unsigned char * dhash(unsigned char *data, long len);

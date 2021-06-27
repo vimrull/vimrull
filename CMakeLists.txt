@@ -3,10 +3,12 @@ set(CMAKE_CXX_STANDARD 14)
 
 project(bitcoin VERSION 0.1)
 
+find_package(PkgConfig)
 add_definitions(-DDBG_PRINT=Verbose)
 
 set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
+pkg_check_modules(libsecp256k1 REQUIRED IMPORTED_TARGET libsecp256k1)
 
 include_directories(${CURL_INCLUDE_DIR})
 
@@ -50,12 +52,11 @@ add_executable(bitcointest ${CORE_FILES}
         tests/testtransactionoutput.cpp
         tests/vm/testscript.cpp
         tests/vm/testvariable.cpp
-        tests/hashlib/testripemd160.cpp tests/crypto/signtest.cpp)
+        tests/hashlib/testripemd160.cpp tests/crypto/signtest.cpp tests/crypto/testlibsecp256k1.cpp)
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
-
 target_link_libraries(bitcointest ${CURL_LIBRARIES}
         tink::static
         absl::algorithm
@@ -71,4 +72,6 @@ target_link_libraries(bitcointest ${CURL_LIBRARIES}
         absl::synchronization
         absl::time
         absl::utility
+        PkgConfig::libsecp256k1
+        libcryptopp.a
         )

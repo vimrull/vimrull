@@ -35,6 +35,13 @@
 #include <proto/tink.pb.h>
 #include <tink/signature/signature_pem_keyset_reader.h>
 
+// install
+// git clone https://github.com/vimrull/cryptopp
+// cd cryptocpp
+// make && sudo make install
+#include "cryptopp/eccrypto.h"
+#include "cryptopp/osrng.h"
+#include "cryptopp/oids.h"
 // static
 std::unique_ptr<crypto::tink::KeysetWriter> GetBinaryKeysetWriter(
         const std::string& filename) {
@@ -165,4 +172,38 @@ TEST_CASE("Test PEM Format", "[crypto]")
     //builder.Add(pem_serialized_key);
     //auto keyset_reader_or = builder.Build();
     //REQUIRE(keyset_reader_or.status().ok());
+}
+
+TEST_CASE("Test crypto++ sign", "[sign]")
+{
+    //https://www.cryptopp.com/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+    using namespace CryptoPP;
+    AutoSeededRandomPool prng;
+
+    ECDSA<ECP, SHA256>::PrivateKey k1;
+    k1.Initialize( prng, ASN1::secp256r1() );
+    ECDSA<ECP, SHA256>::Signer signer(k1);
+
+    std::string message = "Do or do not. There is no try.";
+    size_t siglen = signer.MaxSignatureLength();
+    std::string signature(siglen, 0x00);
+
+
+    siglen = signer.SignMessage( prng, (const byte*)&message[0], message.size(), (byte*)&signature[0] );
+    signature.resize(siglen);
+
+    //std::cout << hexdump((void *) signature.c_str(), signature.length()) << std::endl;
+    ECDSA<ECP, SHA256>::PublicKey publicKey;
+    k1.MakePublicKey(publicKey);
+    ECDSA<ECP, SHA256>::Verifier verifier(publicKey);
+
+    bool result = verifier.VerifyMessage( (const byte*)&message[0], message.size(), (const byte*)&signature[0], signature.size() );
+
+    // Verification failure?
+    if( !result ) {
+        //std::cout << "Failed to verify signature on message" << std::endl;
+        FAIL();
+    } else {
+        //std::cout << "All good!" << std::endl;
+    }
 }
