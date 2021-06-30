@@ -10,9 +10,10 @@ set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
 pkg_check_modules(libsecp256k1 REQUIRED IMPORTED_TARGET libsecp256k1)
 
-include_directories(${CURL_INCLUDE_DIR})
+# apt-get install libssl-dev
+find_package(OpenSSL REQUIRED)
 
-add_subdirectory(tink)
+include_directories(${CURL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 set(CORE_FILES Block.cpp
         BlockHeader.cpp
@@ -52,26 +53,17 @@ add_executable(bitcointest ${CORE_FILES}
         tests/testtransactionoutput.cpp
         tests/vm/testscript.cpp
         tests/vm/testvariable.cpp
-        tests/hashlib/testripemd160.cpp tests/crypto/signtest.cpp tests/crypto/testlibsecp256k1.cpp)
+        tests/hashlib/testripemd160.cpp
+        #tests/crypto/signtest.cpp
+        tests/crypto/testlibsecp256k1.cpp
+        tests/crypto/test_open_ssl.cpp
+        crypto/util.cpp crypto/util.h)
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
 target_link_libraries(bitcointest ${CURL_LIBRARIES}
-        tink::static
-        absl::algorithm
-        absl::base
-        absl::debugging
-        absl::flat_hash_map
-        absl::flags
-        absl::memory
-        absl::meta
-        absl::numeric
-        absl::random_random
-        absl::strings
-        absl::synchronization
-        absl::time
-        absl::utility
+        ${OPENSSL_LIBRARIES}
         PkgConfig::libsecp256k1
         libcryptopp.a
         )

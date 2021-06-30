@@ -209,6 +209,7 @@ TEST_CASE("Test crypto++ sign - generate key", "[sign]")
     }
 }
 
+// https://www.cryptopp.com/wiki/Elliptic_Curve_Digital_Signature_Algorithm#Complete_Example
 TEST_CASE("Test crypto++ sign - use existing key", "[sign]")
 {
     using namespace CryptoPP;
@@ -228,6 +229,9 @@ TEST_CASE("Test crypto++ sign - use existing key", "[sign]")
     //k1.Initialize( prng, ASN1::secp256r1() );
     k1.BERDecodePrivateKey(queue, false /*paramsPresent*/, queue.MaxRetrievable());
     REQUIRE(queue.IsEmpty());
+
+    AutoSeededRandomPool prng2;
+    REQUIRE(k1.Validate(prng2, 2));
     ECDSA_RFC6979<ECP, SHA256>::Signer signer(k1);
 
     std::string message = "Do or do not. There is no try.";
@@ -243,7 +247,7 @@ TEST_CASE("Test crypto++ sign - use existing key", "[sign]")
     k1.MakePublicKey(publicKey);
     ECDSA_RFC6979<ECP, SHA256>::Verifier verifier(publicKey);
 
-    bool result = verifier.VerifyMessage( (const byte*)&message[0], message.size(), (const byte*)&signature[0], signature.size() );
+    bool result = verifier.VerifyMessage( (const byte*)message.c_str(), message.size(), (const byte*)signature.c_str(), signature.size() );
 
     REQUIRE(result);
 }
