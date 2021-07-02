@@ -1,6 +1,3 @@
 [submodule "tests/bitcoindata"]
 	path = tests/bitcoindata
 	url = https://github.com/vimrull/bitcoindata.git
-[submodule "tink"]
-	path = tink
-	url = https://github.com/vimrull/tink.git

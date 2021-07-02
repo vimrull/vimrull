@@ -54,8 +54,6 @@ add_executable(bitcointest ${CORE_FILES}
         tests/vm/testscript.cpp
         tests/vm/testvariable.cpp
         tests/hashlib/testripemd160.cpp
-        #tests/crypto/signtest.cpp
-        tests/crypto/testlibsecp256k1.cpp
         tests/crypto/test_open_ssl.cpp
         crypto/util.cpp crypto/util.h)
 
