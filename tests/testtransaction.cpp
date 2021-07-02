@@ -2,7 +2,7 @@
 // Created on 6/12/21.
 //
 #include <Transaction.h>
-#include "catch2.hpp"
+#include "../include/catch2/catch2.hpp"
 
 TEST_CASE("Test transaction unpack_hex/pack_hex", "[TransactionOutput]")
 {

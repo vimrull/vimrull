@@ -1,5 +1,5 @@
 #include <BlockHeader.h>
-#include "catch2.hpp"
+#include "../include/catch2/catch2.hpp"
 
 TEST_CASE("Test block header unpack_hex/pack_hex", "[BlockHeader]")
 {

@@ -1,16 +1,12 @@
-#include <tests/catch2.hpp>
+#include <catch2/catch2.hpp>
 #include <vm/opcodes.h>
 #include <vm/variable.h>
 #include <vm/BitcoinVM.h>
 #include <Block.h>
 #include <hashlib/sha256.h>
+#include <cstring>
 #include "load.h"
 #include "crypto/util.h"
-#include "cryptopp/eccrypto.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/oids.h"
-#include <cryptopp/hex.h>
-using namespace CryptoPP;
 
 TEST_CASE("Test standard script", "[vm]")
 {
@@ -151,7 +147,7 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     output_block.transactions[1].pack_hex(tx1ss);
     auto hash_type_str = hexdump((void *) &hash_type, 4); //"01000000";
     std::string raw_tx_hex = tx1ss.str() + hash_type_str;
-    std::vector<byte> raw_tx(raw_tx_hex.length()/2);
+    std::vector<unsigned char> raw_tx(raw_tx_hex.length()/2);
     hex2bin(raw_tx.data(), (unsigned char *)raw_tx_hex.c_str(), raw_tx_hex.length());
 
     //TODO: figure out if we need to resize as we initialize vector with len

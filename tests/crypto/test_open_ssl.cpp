@@ -1,4 +1,4 @@
-#include <tests/catch2.hpp>
+#include <catch2/catch2.hpp>
 #include "load.h"
 #include "crypto/util.h"
 

@@ -1,5 +1,5 @@
 #include <vm/variable.h>
-#include "tests/catch2.hpp"
+#include <catch2/catch2.hpp>
 
 TEST_CASE("Test variable copy - type = value", "[variable]")
 {

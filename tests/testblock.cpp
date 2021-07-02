@@ -2,7 +2,7 @@
 // Created on 6/12/21.
 //
 #include <Block.h>
-#include "catch2.hpp"
+#include "../include/catch2/catch2.hpp"
 
 TEST_CASE("Test Block unpack_hex/pack_hex", "[Block]")
 {

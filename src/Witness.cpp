@@ -25,6 +25,7 @@ int Witness::pack_hex(std::stringstream &ss)
     {
         pack_ptr2hex(ss, script_.data(), witness_len);
     }
+    return witness_len * 2;
 }
 
 std::vector<Witness> Witness::unpack_list(std::stringstream &ss)

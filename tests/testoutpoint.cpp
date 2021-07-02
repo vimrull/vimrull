@@ -2,7 +2,7 @@
 // Created on 6/12/21.
 //
 #include <Outpoint.h>
-#include "catch2.hpp"
+#include "../include/catch2/catch2.hpp"
 
 TEST_CASE("Test Outpoint unpack_hex/pack_hex", "[Outpoint]")
 {

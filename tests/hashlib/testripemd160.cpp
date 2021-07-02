@@ -1,4 +1,4 @@
-#include <tests/catch2.hpp>
+#include "../../include/catch2/catch2.hpp"
 
 #include <string>
 #include <algorithm>

@@ -1,4 +1,4 @@
-#include "catch2.hpp"
+#include "../include/catch2/catch2.hpp"
 #include <TransactionOutput.h>
 
 TEST_CASE("Test transaction output unpack_hex/pack_hex", "[TransactionOutput]")
