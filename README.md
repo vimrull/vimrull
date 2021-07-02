@@ -9,3 +9,6 @@ I am bitcoin newbie and currently learning bitcoin and this git account is to ex
 * Implement most known validation that can statically validate the blckchain without the code execution
 * Implement a small VM that can execute the op-codes to be able to fully validate bitcoin ledger / block chain
 
+### Build status
+
+![Build and test badge](https://github.com/vimrull/vimrull/actions/workflows/build_test.yml/badge.svg)
