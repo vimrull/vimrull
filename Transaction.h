@@ -33,4 +33,6 @@ public:
 	virtual void print();
 
 	virtual bool is_valid();
+
+    bool pack_hex_for_validation(std::stringstream stringstream, std::vector<unsigned char> vector);
 };

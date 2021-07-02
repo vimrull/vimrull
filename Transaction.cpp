@@ -159,3 +159,8 @@ bool Transaction::is_valid()
 
     return true;
 }
+
+bool Transaction::pack_hex_for_validation(std::stringstream ss, std::vector<unsigned char> locking_script)
+{
+    return false;
+}

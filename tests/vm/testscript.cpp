@@ -1,4 +1,3 @@
-
 #include <tests/catch2.hpp>
 #include <vm/opcodes.h>
 #include <vm/variable.h>
@@ -59,6 +58,13 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     hash_input_tx[32] = 0;
     std::string hash_input_tx_str =  hexdump((void *)hash_input_tx, 32);
 
+    REQUIRE(input_block.transactions[0].outputs[0].script_size == 0x43);
+    REQUIRE(input_block.transactions[0].outputs[0].script[0] == 0x41);
+    auto locking_script_size = input_block.transactions[0].outputs[0].script_size;
+    std::string locking_script_hex = hexdump((void*)input_block.transactions[0].outputs[0].script, locking_script_size);
+    std::string expected_locking_script = "410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eadd"
+                                          "fb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
+    REQUIRE(locking_script_hex.compare(expected_locking_script) == 0);
     // output
     std::string block_id = "00000000d1145790a8694403d4063f323d499e655c83426834d4ce2f8dd4a2ee"; // block 170
     std::string block_filename = "bitcoindata/rawblock/" + block_id + ".hex";
@@ -77,6 +83,7 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     REQUIRE(output_block.transactions[0].inputs[0].IsCoinbase() == true);
     REQUIRE(output_block.transactions[1].input_count == 1);
     REQUIRE(output_block.transactions[1].inputs[0].IsCoinbase() == false);
+    REQUIRE(input_block.transactions[0].inputs[0].sequence == 0xffffffff);
 
     std::string expected_tx_input = "c997a5e56e104102fa209c6a852dd90660a20b2d9c352423edce25857fcd3704000000004847304402"
                                     "204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d624c6c61548ab5fb8cd410220181522ec8eca"
@@ -87,6 +94,7 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
 
     REQUIRE(expected_tx_input.compare(tx_input_str) == 0);
     std::string expect_previous_tx_hash = "c997a5e56e104102fa209c6a852dd90660a20b2d9c352423edce25857fcd3704";
+
     std::string previous_tx_hash = hexdump((void *)output_block.transactions[1].inputs[0].previous_output.hash, 32);
     REQUIRE(expect_previous_tx_hash.compare(previous_tx_hash) == 0);
     REQUIRE(expect_previous_tx_hash.compare(hash_input_tx_str) == 0);
@@ -164,17 +172,6 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     std::string expected_public_key_hex = hexdump((void *) expected_public_key.data(), expected_public_key.size());
     REQUIRE(expected_public_key_hex.compare(script_str) == 0);
 
-    std::stringstream tx1ss;
-    output_block.transactions[1].pack_hex(tx1ss);
-    std::string raw_tx_hex = tx1ss.str();
-    //std::cout << "From block: "  << raw_tx_hex << std::endl;
-    std::vector<byte> raw_tx(raw_tx_hex.length()/2);
-    hex2bin(raw_tx.data(), (unsigned char *)raw_tx_hex.c_str(), raw_tx_hex.length());
-    //REQUIRE(expected_raw_tx.size() == raw_tx.size());
-
-    //TODO: figure out if we need to resize as we initialize vector with len
-    raw_tx.resize(raw_tx_hex.length()/2);
-
     // first byte is script length and last byte is hash type - so we subtract 2
     std::vector<unsigned char> signature(output_block.transactions[1].inputs[0].script_size-2);
     int script_len = output_block.transactions[1].inputs[0].script[0];
@@ -185,21 +182,29 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     //std::vector<unsigned char> hashtx(32);
 
     // From the actual block
+    std::stringstream tx1ss;
+    std::vector<unsigned char> locking_script(input_block.transactions[0].outputs[0].script,
+                                              input_block.transactions[0].outputs[0].script
+                                              + input_block.transactions[0].outputs[0].script_size);
+
+    output_block.transactions[1].inputs[0].script_size = input_block.transactions[0].outputs[0].script_size;
+    output_block.transactions[1].inputs[0].script = input_block.transactions[0].outputs[0].script;
+
+    output_block.transactions[1].pack_hex(tx1ss);
+    std::string raw_tx_hex = tx1ss.str() + "01000000";
+    //std::cout << "From block: "  << raw_tx_hex << std::endl;
+    std::vector<byte> raw_tx(raw_tx_hex.length()/2);
+    hex2bin(raw_tx.data(), (unsigned char *)raw_tx_hex.c_str(), raw_tx_hex.length());
+    REQUIRE(expected_raw_tx == raw_tx);
+    std::cout << raw_tx_hex << std::endl;
+
+    //TODO: figure out if we need to resize as we initialize vector with len
+    raw_tx.resize(raw_tx_hex.length()/2);
+
     long tlen0 = raw_tx.size();
     auto hashtx_raw0 =  dhash((unsigned char *)raw_tx.data(), tlen0);
     std::vector<unsigned char> hashtx0(hashtx_raw0, hashtx_raw0 + 32);
-    std::reverse(hashtx0.begin(), hashtx0.end());
     std::string tx_hash0 = hexdump((void*) hashtx0.data(), 32);
-    REQUIRE(tx_hash0.compare("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16") == 0);
-
-    // From hardcoded raw expected tx
-    long tlen = expected_raw_tx.size();
-    auto hashtx_raw =  dhash((unsigned char *)expected_raw_tx.data(), tlen);
-    std::vector<unsigned char> hashtx(hashtx_raw, hashtx_raw + 32);
-    //std::reverse(hashtx.begin(), hashtx.end());
-    std::string tx_hash = hexdump((void*) hashtx.data(), 32);
-
-    //std::cout << tx_hash <<  std::endl;
-    REQUIRE(tx_hash.compare("7a05c6145f10101e9d6325494245adf1297d80f8f38d4d576d57cdba220bcb19") == 0);
-    REQUIRE(valid_signature(hashtx, signature, script));
+    REQUIRE(tx_hash0.compare("7a05c6145f10101e9d6325494245adf1297d80f8f38d4d576d57cdba220bcb19") == 0);
+    REQUIRE(valid_signature(hashtx0, signature, script));
 }
