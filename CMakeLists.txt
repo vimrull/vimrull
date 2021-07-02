@@ -8,8 +8,6 @@ add_definitions(-DDBG_PRINT=Verbose)
 
 set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
-
-# apt-get install libssl-dev
 find_package(OpenSSL REQUIRED)
 
 include_directories(${CURL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
@@ -55,7 +53,7 @@ add_executable(bitcointest ${CORE_FILES}
         tests/vm/testvariable.cpp
         tests/hashlib/testripemd160.cpp
         tests/crypto/test_open_ssl.cpp
-        src/crypto/util.cpp src/crypto/util.h)
+        src/crypto/util.cpp src/crypto/util.h tests/testdatabase.cpp)
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -64,4 +62,5 @@ target_include_directories(bitcointest PUBLIC
 
 target_link_libraries(bitcointest ${CURL_LIBRARIES}
         ${OPENSSL_LIBRARIES}
+        sqlite3
         )
