@@ -24,17 +24,20 @@ set(CORE_FILES src/Block.cpp
         src/TransactionOutput.cpp
         src/Witness.cpp
         src/vm/BitcoinVM.cpp
-        src/vm/opcodes.h
         src/vm/variable.cpp
-        src/vm/variable.h
         src/crypto/util.cpp
+        src/db/database.cpp
         )
 
 add_executable(testinit ${CORE_FILES}
         tests/test_download.cpp
         )
 
-target_link_libraries(testinit ${CURL_LIBRARIES})
+target_link_libraries(testinit
+        ${CURL_LIBRARIES}
+        ${OPENSSL_LIBRARIES}
+        sqlite3
+        )
 
 target_include_directories(testinit PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -55,7 +58,8 @@ add_executable(bitcointest ${CORE_FILES}
         tests/vm/testvariable.cpp
         tests/hashlib/testripemd160.cpp
         tests/crypto/test_open_ssl.cpp
-        tests/testdatabase.cpp src/db/database.cpp src/db/database.h)
+        tests/testdatabase.cpp
+        )
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
