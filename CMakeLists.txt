@@ -26,7 +26,9 @@ set(CORE_FILES src/Block.cpp
         src/vm/BitcoinVM.cpp
         src/vm/opcodes.h
         src/vm/variable.cpp
-        src/vm/variable.h)
+        src/vm/variable.h
+        src/crypto/util.cpp
+        )
 
 add_executable(testinit ${CORE_FILES}
         tests/test_download.cpp
@@ -53,7 +55,7 @@ add_executable(bitcointest ${CORE_FILES}
         tests/vm/testvariable.cpp
         tests/hashlib/testripemd160.cpp
         tests/crypto/test_open_ssl.cpp
-        src/crypto/util.cpp src/crypto/util.h tests/testdatabase.cpp)
+        tests/testdatabase.cpp src/db/database.cpp src/db/database.h)
 
 target_include_directories(bitcointest PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src

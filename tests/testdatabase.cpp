@@ -1,40 +1,26 @@
 #include <iostream>
 #include <filesystem>
-#include <sqlite3.h>
 #include "catch2/catch2.hpp"
+#include "db/database.h"
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName){
-    int i;
-    for(i=0; i<argc; i++)
-    {
-        //printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-    //printf("\n");
-    return 0;
-}
 
 TEST_CASE("Test create sqlite3 database and create a table", "sqlite3")
 {
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
     std::string tx_db_filename = "bitcoindata/db/tx.db";
+    database db(tx_db_filename);
+    REQUIRE(db.create_tx_table());
+    std::string tx_id="txid1";
+    std::string block_id="block1";
+    int block_height = 10;
+    REQUIRE(db.insert_tx_table(tx_id, block_id, block_height));
 
-    rc = sqlite3_open(tx_db_filename.c_str(), &db);
-    if (rc)
-    {
-        FAIL();
-        sqlite3_close(db);
-        return;
-    }
-    std::string sql = "CREATE TABLE IF NOT EXISTS TX(id TEXT PRIMARY KEY NOT NULL)";
-    rc = sqlite3_exec(db,  sql.c_str(), callback, 0, &zErrMsg);
-    if (rc != SQLITE_OK)
-    {
-        FAIL();
-        sqlite3_free(zErrMsg);
-    }
+    std::string tx_id_loaded, block_id_loaded;
+    auto tx = db.load_tx(tx_id);
 
-    sqlite3_close(db);
+    REQUIRE((tx_id == std::any_cast<std::string>(tx["id"])
+            && block_id == std::any_cast<std::string>(tx["block_id"])
+            && block_height == std::any_cast<int>(tx["block_height"])
+            ));
+
     std::filesystem::remove(std::filesystem::path(tx_db_filename));
 }
