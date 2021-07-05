@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "BlockHeader.h"
-
+#include <any>
 //#define VALIDATION_FAIL_MSG std::cout << "Validation failed at: " << __FILE__ << ":" << __LINE__ << std::endl;
 #define VALIDATION_FAIL_MSG
 
@@ -46,3 +46,24 @@ void print_hash(const char *data, long len);
 unsigned char * dhash(unsigned char *data, long len);
 
 #define SIGHASH_ALL 0x00000001
+
+class finalizer
+{
+public:
+    finalizer(void (*pFinal)(std::any), std::any param) {
+        this->pFinal = pFinal;
+        this->param = param;
+    }
+
+    ~finalizer()
+    {
+        if(pFinal)
+        {
+            pFinal(param);
+        }
+    }
+
+private:
+    std::any param;
+    void (*pFinal)(std::any);
+};

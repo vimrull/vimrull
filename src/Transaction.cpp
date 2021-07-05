@@ -160,6 +160,20 @@ bool Transaction::is_valid()
     return true;
 }
 
+std::vector<unsigned char> Transaction::calculate_id()
+{
+    std::stringstream  ss_input_output_tx;
+    this->pack_hex(ss_input_output_tx);
+    std::string input_output_tx = ss_input_output_tx.str();
+    std::vector<unsigned char> input_output_tx_bin(input_output_tx.length()/2+1);
+    hex2bin(input_output_tx_bin.data(), (unsigned char *) input_output_tx.c_str(), input_output_tx.length());
+    input_output_tx_bin.resize(input_output_tx.length()/2);
+
+    long input_tx_len = input_output_tx_bin.size();
+    auto hash_input_tx = dhash((unsigned char *)(input_output_tx_bin.data()), input_tx_len);
+    return std::vector<unsigned char>(hash_input_tx, hash_input_tx+32);
+}
+
 bool Transaction::pack_hex_for_validation(std::stringstream ss, std::vector<unsigned char> locking_script)
 {
     return false;

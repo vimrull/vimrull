@@ -14,8 +14,6 @@
 #include "load.h"
 #include "Block.h"
 
-#define GENESIS_BLOCK_HASH "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
-
 TEST_CASE("Test varint functions", "[varint functions]")
 {
     unsigned char output[10];
@@ -96,12 +94,12 @@ TEST_CASE("Test varint functions", "[varint functions]")
 
 TEST_CASE("Test block traversing", "[block loop]")
 {
-    std::string next_block = "00000000edfa5bfffd21cc8ce76e46b79dc00196e61cdc62fd595316136f8a83"; // block 1024
+    std::string prev_block = "00000000edfa5bfffd21cc8ce76e46b79dc00196e61cdc62fd595316136f8a83"; // block 1024
 
     bool found_genesis = false;
     while (!found_genesis) {
-        std::string file_name = "bitcoindata/rawblock/"+next_block+".hex";
-        //REQUIRE(std::filesystem::exists(file_name));  // run downloader first (testinit)
+        std::string file_name = "bitcoindata/rawblock/" + prev_block + ".hex";
+        REQUIRE(std::filesystem::exists(file_name));  // run downloader first (testinit)
         std::stringstream ss;
         read_block_file(file_name, ss);
         Block block;
@@ -123,14 +121,14 @@ TEST_CASE("Test block traversing", "[block loop]")
         char outh[160];
         hex2bin((unsigned char *) outh, (unsigned char *) outheader.str().c_str(), lenh);
 
-        if (std::string(next_block).compare(GENESIS_BLOCK_HASH) != 0)
+        if (std::string(prev_block).compare(BITCOIN_GENESIS_BLOCK_HASH) != 0)
         {
             // move next
             std::reverse((unsigned char *) block.header.prev_block, (unsigned char *) block.header.prev_block + 32);
             std::stringstream ssf;
             hexdump(ssf, block.header.prev_block, 32);
             file_name = ssf.str();
-            next_block = file_name;
+            prev_block = file_name;
         }
         else
         {

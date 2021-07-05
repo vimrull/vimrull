@@ -35,4 +35,6 @@ public:
 	virtual bool is_valid();
 
     bool pack_hex_for_validation(std::stringstream stringstream, std::vector<unsigned char> vector);
+
+    std::vector<unsigned char> calculate_id();
 };
