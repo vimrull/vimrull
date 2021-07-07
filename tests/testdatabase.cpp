@@ -26,18 +26,7 @@ TEST_CASE("Test create sqlite3 database and create table, insert and load a row"
     std::filesystem::remove(std::filesystem::path(tx_db_filename));
 }
 
-TEST_CASE("Test block tx insertion", "[database]")
-{
-    const std::string tx_db_filename = "bitcoindata/db/test01.db";
-    database db(tx_db_filename);
-    REQUIRE(db.create_tx_table());
-
-    //TODO: find a way to access local variables in this function
-    const finalizer fin([] (std::any param) {
-        std::string fn = std::any_cast<std::string>(param);
-        std::filesystem::remove(std::filesystem::path(fn));
-    }, tx_db_filename);
-
+static void populate_tx(database &db) {
     std::string prev_block = "00000000edfa5bfffd21cc8ce76e46b79dc00196e61cdc62fd595316136f8a83"; // block 1024
     int tx_count = 0;
     bool found_genesis = false;
@@ -51,7 +40,6 @@ TEST_CASE("Test block tx insertion", "[database]")
         Block block;
         block.unpack_hex(ss);
 
-        REQUIRE(block.is_valid());
         for(auto tx: block.transactions) {
             for(auto txo: tx.outputs) {
                 auto tx_id = tx.calculate_id();
@@ -61,20 +49,6 @@ TEST_CASE("Test block tx insertion", "[database]")
                 tx_count++;
             }
         }
-
-        std::stringstream output, out, outheader;
-        block.pack_hex(output);
-        auto outstr = output.str();
-        hexdump(out, (unsigned char *) outstr.c_str(), outstr.length());
-
-        std::stringstream headerss;
-        block.header.pack(headerss);
-        std::string headerstr = headerss.str();
-        hexdump(outheader, (unsigned char *) headerstr.c_str(), headerstr.length());
-        long lenh = outheader.str().length();
-        assert(lenh == 320);
-        char outh[160];
-        hex2bin((unsigned char *) outh, (unsigned char *) outheader.str().c_str(), lenh);
 
         if (std::string(prev_block).compare(BITCOIN_GENESIS_BLOCK_HASH) != 0)
         {
@@ -94,4 +68,23 @@ TEST_CASE("Test block tx insertion", "[database]")
     //std::cout << "Total transactions found: " << tx_count << std::endl;
     REQUIRE(tx_count == 1054);
     REQUIRE(found_genesis);
+}
+
+TEST_CASE("Test block tx insertion", "[database]")
+{
+    const std::string tx_db_filename = "bitcoindata/db/test01.db";
+    database db(tx_db_filename);
+    REQUIRE(db.create_tx_table());
+
+    //TODO: find a way to access local variables in this function
+    const finalizer fin([] (std::any param) {
+        std::string fn = std::any_cast<std::string>(param);
+        std::filesystem::remove(std::filesystem::path(fn));
+    }, tx_db_filename);
+
+    populate_tx(db);
+    auto tx = db.load_tx("c997a5e56e104102fa209c6a852dd90660a20b2d9c352423edce25857fcd3704");
+    REQUIRE(std::any_cast<std::string>(tx["block_id"]).compare(
+            "000000008d9dc510f23c2657fc4f67bea30078cc05a90eb89e84cc475c080805") == 0);
+    REQUIRE(std::any_cast<int>(tx["block_height"]) == 9);
 }
