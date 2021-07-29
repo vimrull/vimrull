@@ -10,21 +10,7 @@
 
 TEST_CASE("Test standard script", "[vm]")
 {
-    // TODO: put actual address and signature
-    // OP_DUP OP_HASH160 <bytelen> <bytelen bytes> OP_EQUALVERIFY OP_CHECKSIG
-    std::string op_codes_str="76A914AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA88AC";
-    std::vector<unsigned char> op_codes;
-    op_codes.resize(op_codes_str.length() / 2 + 1);
-    hex2bin((unsigned char *)op_codes.data(), (unsigned char *)op_codes_str.c_str(), op_codes_str.length());
-    auto vm = std::make_unique<BitcoinVM>();
-    variable v_sig, v;
-    v_sig.type_ = value_type::DATA;
-    v_sig.data = {'a', 'b', 'c'};
-    vm->stack_.push(v_sig);
-    v.type_ = value_type::STRING;
-    v.str = "hello";
-    vm->stack_.push(v);
-    REQUIRE(vm->execute(op_codes));
+
 }
 
 TEST_CASE("Validate transaction in block 170", "[transaction]")
@@ -106,6 +92,14 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     REQUIRE(output_block.transactions[0].output_count == 1);
     REQUIRE(output_block.transactions[1].output_count == 2);
 
+    // 0x41 <0x41 bytes data> OP_CHECKSIG
+    std::string op_codes_str="410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eadd"
+                             "fb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac";
+
+    std::vector<unsigned char> op_codes;
+    op_codes.resize(op_codes_str.length() / 2);
+    hex2bin((unsigned char *)op_codes.data(), (unsigned char *)op_codes_str.c_str(), op_codes_str.length());
+
     //output 0
     REQUIRE(output_block.transactions[1].outputs[0].value == 1000000000);
     REQUIRE(output_block.transactions[1].outputs[0].script_size == 0x43);
@@ -124,6 +118,7 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     std::memcpy(script.data(), &output_script1[1], slen);
     std::string script_str = hexdump((void*)script.data(), slen);
 
+    // std::cout <<script_str << std::endl;
     // first byte is script length and last byte is hash type - so we subtract 2
     std::vector<unsigned char> signature(output_block.transactions[1].inputs[0].script_size-2);
     int script_len = output_block.transactions[1].inputs[0].script[0];
@@ -157,5 +152,18 @@ TEST_CASE("Validate transaction in block 170", "[transaction]")
     std::vector<unsigned char> hashtx0(hashtx_raw0, hashtx_raw0 + 32);
     std::string tx_hash0 = hexdump((void*) hashtx0.data(), 32);
     REQUIRE(tx_hash0.compare("7a05c6145f10101e9d6325494245adf1297d80f8f38d4d576d57cdba220bcb19") == 0);
+
     REQUIRE(valid_signature(hashtx0, signature, script));
+
+    // vm test
+
+    auto vm = std::make_unique<BitcoinVM>();
+    variable v_sig, v;
+    v_sig.type_ = value_type::DATA;
+    v_sig.data = signature;
+    vm->stack_.push(v_sig);
+    v.type_ = value_type::DATA;
+    v.data = hashtx0;
+    vm->stack_.push(v);
+    REQUIRE(vm->execute(op_codes));
 }
