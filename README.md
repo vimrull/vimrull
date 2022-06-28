@@ -12,3 +12,5 @@ I am bitcoin newbie and currently learning bitcoin and this git account is to ex
 ### Build status
 
 ![Build and test badge](https://github.com/vimrull/vimrull/actions/workflows/build_test.yml/badge.svg)
+
+### Vimrull is now an organization maintained by the original author Maruf Abbasi ( @kuasha )
