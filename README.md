@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-I am bitcoin newbie and currently learning bitcoin and this git account is to explore ideas about cryptocurrencies.
+This git account is to explore ideas about cryptocurrencies.
 
 ### The plan
 
